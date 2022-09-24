@@ -4,6 +4,7 @@ title:      "Essential C++读书笔记（一）"
 date:       2022-09-24 15:00:00
 author:     "Gnoy-Nus"
 catalog: true
+header-style: text
 tags:
     - Essential C++读书笔记
 ---
