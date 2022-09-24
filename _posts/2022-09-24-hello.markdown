@@ -4,7 +4,7 @@ title:      "Hello 2022"
 subtitle:   " \"Hello World, Hello Blog\""
 date:       2022-09-24 12:00:00
 author:     "Gnoy-Nus"
-header-img: "img/post-bg-2015.jpg"
+header-img: "img/post-bg-hello.jpg"
 catalog: true
 tags:
     - 闲谈

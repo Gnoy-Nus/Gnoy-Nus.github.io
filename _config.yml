@@ -62,7 +62,7 @@ kramdown:
 disqus_username: gnoynus
 
 # Netease settings
-netease_comment: false
+netease_comment: true
 
 # Analytics settings
 # Baidu Analytics
@@ -79,7 +79,7 @@ sidebar-avatar: https://avatars.githubusercontent.com/u/69850710?s=400&u=eb4c8a1
 
 # Featured Tags
 featured-tags: true # whether or not using Feature-Tags
-featured-condition-size: 1 # A tag will be featured if the size of it is more than this condition value
+featured-condition-size: 0 # A tag will be featured if the size of it is more than this condition value
 
 # Progressive Web Apps
 chrome-tab-theme-color: "#000000"
