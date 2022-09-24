@@ -1,0 +1,27 @@
+---
+layout:     post
+title:      "Hello 2022"
+subtitle:   " \"Hello World, Hello Blog\""
+date:       2022-09-24 12:00:00
+author:     "Gnoy-Nus"
+header-img: "img/post-bg-2015.jpg"
+catalog: true
+tags:
+    - 闲谈
+---
+
+> 个人博客再次开通了
+
+
+## 引子
+
+之前用过一个简单的模板搞了个github的page，相当于个人简历，但是不太适合写博客。
+
+昨天在看Unity Shader入门精要的学习视频时注意到了原书作者的[博客](http://candycat1992.github.io/)，感觉很好，顺藤摸瓜找到了现在的这个模板。
+
+现在这个模板的页面挺干净的，markdown写博客也挺方便。
+
+
+## 博客模板相关链接
+- https://github.com/huxpro/huxpro.github.io/
+
