@@ -59,7 +59,7 @@ kramdown:
       start_line: 1
 
 # Disqus settings
-disqus_username: https-gnoy-nus-github-io
+# disqus_username: https-gnoy-nus-github-io
 
 # Netease settings
 netease_comment: true
