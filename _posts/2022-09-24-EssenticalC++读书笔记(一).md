@@ -21,10 +21,10 @@ tags:
 
 - 在头文件中声明变量，为了防止看起来像定义一样需要加入`extern`关键字，`const Object`例外
 
-  - ```c++
+   ```c++
     const int func_cnt = 6; //const Object例外
     extern const vector<int>* (*func_array[func_cnt])(int)  //声明函数指针的数组，func_array不是const变量，它是指向const Object的指针
-    ```
+  ```
 
 
 
