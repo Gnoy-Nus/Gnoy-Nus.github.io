@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "Essential C++读书笔记（一）"
+title:      "Essential C++ 读书笔记"
 date:       2022-09-24 15:00:00
 author:     "Gnoy-Nus"
 catalog: true
