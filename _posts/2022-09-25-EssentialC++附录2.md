@@ -62,7 +62,7 @@ iterator it=max_element(vec.begin(),vec,end());
 
 第六个参数改变排序方式、可有可无
 
-```
+```c++
 merge(vec1.begin(),vec1,end(),vec2.begin(),vec2,end(),vec_result.begin(),greater<int>())
 ```
 
@@ -70,7 +70,7 @@ merge(vec1.begin(),vec1,end(),vec2.begin(),vec2,end(),vec_result.begin(),greater
 
 重新排列，使得小于第n个元素的在之前，大于的在其后
 
-```
+```c++
 int ia[]={1,2,3,4,5,6,27,8,9,10,11,12};
 nth_element(ia,ia+6,&ia[12]);//第n个元素为ia+6【27】
 ```
@@ -79,7 +79,7 @@ nth_element(ia,ia+6,&ia[12]);//第n个元素为ia+6【27】
 
 ## partial_sort_copy 局部排序并复制
 
-```
+```c++
 partial_sort (ia,ia+6,last);//ia到ia+5进行局部排序，其余不动
 ```
 
@@ -87,7 +87,7 @@ partial_sort (ia,ia+6,last);//ia到ia+5进行局部排序，其余不动
 
 原序列每个元素计算前缀和(加上自身)得到新的序列
 
-```
+```c++
 #include <numeric>
 partial_sum(vec.begin(),vec.end(),vres.begin(),multiplies<int>());
 ```
@@ -98,14 +98,14 @@ partial_sum(vec.begin(),vec.end(),vres.begin(),multiplies<int>());
 
 stable版本保证相对顺序不变
 
-```
+```c++
 #include <algorithm>
 stable_partition(vec.begin(),vec.end(),func());//func()返回bool值
 ```
 
 ## random_shuffle 随机重排
 
-```
+```c++
 #include <algorithm>
 random_shuffle(vec.begin(),vec.end());
 ```
@@ -114,7 +114,7 @@ random_shuffle(vec.begin(),vec.end());
 
 先移除元素，然后复制剩余元素。
 
-```
+```c++
 remove_copy(ia,ia+10,ia2,0);//将ia中非零元素拷贝到ia2
 ```
 
@@ -122,7 +122,7 @@ remove_copy(ia,ia+10,ia2,0);//将ia中非零元素拷贝到ia2
 
 判断为true的元素除去，复制剩余元素
 
-```
+```c++
 remove_copy(ia,ia+10,ia2,EvenValue());//将ia中偶数元素拷贝到ia2
 ```
 
