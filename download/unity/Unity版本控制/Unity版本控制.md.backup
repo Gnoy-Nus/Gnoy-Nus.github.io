@@ -1,0 +1,262 @@
+# 集中式和分布式的版本控制系统（VCS）
+
+集中式：安全、必须连接到服务器才能提交(Perforce)
+
+分布式：github的方式，用户克隆仓库到本地（git）
+
+Plastic SCM既支持集中式，也支持分布式
+
+
+
+# 命名标准
+
+![image-20230419082736558](images/image-20230419082736558.png)
+
+# 文件夹结构
+
+- 内置资源与第三方资源分开放，第三方包括asset store和插件
+- 文件夹结构，示例如下
+
+![image-20230419073457908](images/image-20230419073457908.png)
+
+- 各种类型的资产
+
+  <img src="images/image-20230419073722032.png" alt="image-20230419073722032"  /><img src="images/image-20230419073731169.png" alt="image-20230419073731169"  />
+
+- 通过脚本创建相同的项目文件结构，创建脚本后，顶部Asset框下多出Create Default Folders选项，自定义根目录文件夹的名字(例如下图中的Template)后创建出模板文件夹
+
+![image-20230419082011441](images/image-20230419082011441.png)
+
+```c#
+using UnityEditor;
+using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+public class CreateFolders : EditorWindow
+{
+    private static string projectName = "PROJECT_NAME";
+    [MenuItem("Assets/Create Default Folders")]
+    private static void SetUpFolders()
+    {
+        CreateFolders window = ScriptableObject.CreateInstance<CreateFolders>();
+        window.position = new Rect(Screen.width / 2, Screen.height / 2, 400, 150);
+        window.ShowPopup();
+    }
+    private static void CreateAllFolders()
+    {
+        List<string> folders = new List<string>
+ {
+ "Animations",
+ "Audio",
+ "Editor",
+ "Materials",
+ "Meshes",
+ "Prefabs",
+ "Scripts",
+ "Scenes",
+ "Shaders",
+ "Textures",
+ "UI"
+ };
+        foreach (string folder in folders)
+        {
+            if (!Directory.Exists("Assets/" + folder))
+            {
+                Directory.CreateDirectory("Assets/" + projectName + "/" + folder);
+            }
+        }
+        List<string> uiFolders = new List<string>
+ {
+ "Assets",
+ "Fonts",
+ "Icon"
+ };
+        foreach (string subfolder in uiFolders)
+        {
+            if (!Directory.Exists("Assets/" + projectName + "/UI/" + subfolder))
+            {
+                Directory.CreateDirectory("Assets/" + projectName + "/UI/" + subfolder);
+            }
+        }
+        AssetDatabase.Refresh();
+    }
+    void OnGUI()
+    {
+        EditorGUILayout.LabelField("Insert the Project name used as the root folder");
+        projectName = EditorGUILayout.TextField("Project Name: ", projectName);
+        this.Repaint();
+        GUILayout.Space(70);
+        if (GUILayout.Button("Generate!"))
+        {
+            CreateAllFolders();
+            this.Close();
+        }
+    }
+}
+```
+
+
+
+# meta文件
+
+- .meta文件是自动生成的，但它还保存了许多关于与其关联的文件。当更改任何导入的资产如纹理、网格、音频片段等上的设置，更改将写入.meta文件，而不是资产文件。这就是为什么要将.meta文件提交到你的repo，这样每个人使用相同的文件设置
+
+> 空文件夹的.meta说明：
+>
+> - Plastic SCM can handle empty folders. Directories are treated as entities by  Plastic SCM and have a version history associated with them. 
+> - Unity generates a .meta file for  every file in the project, including folders. 
+> - With Git and Perforce, a user can  easily commit the .meta file for an empty folder, but the folder itself won’t end  up under version control. When another user gets the latest changes, there will  be a .meta file for a folder that doesn’t exist on their machine, and Unity will then  delete the .meta file. Plastic SCM avoids this issue by including empty folders  under version control
+
+
+
+# 工作流程优化
+
+- **UnityYAMLMerge**解决 scene和 prefab 间的冲突：[Unity - Manual: Smart merge (unity3d.com)](https://docs.unity3d.com/Manual/SmartMerge.html)
+
+- **Presets**文件夹：[Unity - Manual: Presets (unity3d.com)](https://docs.unity3d.com/2020.3/Documentation/Manual/Presets.html)
+
+
+
+# 代码模板
+
+`C:\Program Files\Unity\Hub\Editor\2021.3.22f1c1\Editor\Data\Resources\ScriptTemplates`
+
+创建c#脚本或shader脚本时，Unity使用ScriptTemplates中的模板生成脚本文件
+
+可以在项目中通过实现`OnWillCreateAsset`方法，对ScriptTemplate做修改
+
+```c#
+using UnityEngine;
+using UnityEditor;
+public class KeywordReplace : UnityEditor.AssetModificationProcessor
+{
+    public static void OnWillCreateAsset(string path)
+    {
+        path = path.Replace(".meta", "");
+        int index = path.LastIndexOf(".");
+        if (index < 0)
+            return;
+        string file = path.Substring(index);
+        if (file != ".cs" && file != ".js" && file != ".boo")
+            return;
+        index = Application.dataPath.LastIndexOf("Assets");
+        path = Application.dataPath.Substring(0, index) + path;
+        if (!System.IO.File.Exists(path))
+            return;
+        string fileContent = System.IO.File.ReadAllText(path);
+        fileContent = fileContent.Replace("#CREATIONDATE#", System.DateTime.Today.
+       ToString("dd/MM/yy") + "");
+        fileContent = fileContent.Replace("#PROJECTNAME#", PlayerSettings.productName);
+        fileContent = fileContent.Replace("#DEVELOPER#", System.Environment.UserName);
+
+        System.IO.File.WriteAllText(path, fileContent);
+        AssetDatabase.Refresh();
+    }
+}
+```
+
+81-C# Script-NewBehaviourScript.cs.txt 模板如下，加入头部信息
+
+```c#
+// /*-------------------------------------------
+// ---------------------------------------------
+// Creation Date: #CREATIONDATE#
+// Author: #DEVELOPER#
+// Description: #PROJECTNAME#
+// ---------------------------------------------
+// -------------------------------------------*/
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : MonoBehaviour
+{
+ // Start is called before the first frame update
+ void Start()
+ {
+ #NOTRIM#
+ }
+ // Update is called once per frame
+ void Update()
+ {
+ #NOTRIM#
+ }
+}
+#ROOTNAMESPACEEND#
+```
+
+
+
+# VCS工具介绍
+
+## Git
+
+- Unity 插件，可导入git工具：[GitHub for Unity | Bring Git and GitHub into Unity](https://unity.github.com/)
+
+## Perforce (Helix Core)
+
+- 企业级，EA和育碧使用
+- 对大文件的处理比较好，适合Unity
+- 使用说明：[How to Use Unity + Version Control | Perforce](https://www.perforce.com/blog/vcs/how-to-use-unity-version-control)
+
+
+
+## SVN
+
+-  [Apache Subversion](https://subversion.apache.org/) (known as SVN) 
+
+- 可以处理大文件
+- 开源、免费、集中式
+- merge很痛苦
+- 需要第三方GUI插件：[How to Use Unity + Version Control | Perforce](https://www.perforce.com/blog/vcs/how-to-use-unity-version-control)
+
+
+
+## Plastic SCM
+
+- 擅长处理大文件、大仓库
+- 可以只下载单个文件
+- 免费5G的云存储
+- SCM的特性和介绍：[Version control solution for artists | Unity](https://unity.com/solutions/version-control-artists)
+- 既可以分布式、也可以集中式
+
+- 其他资料：
+  - [How to get started with Unity Plastic SCM | Unity](https://unity.com/support-services/redeem/plastic-scm)
+  - [Breakpoint 2: Create without Compromise with Unity Plastic SCM - YouTube](https://www.youtube.com/watch?v=MRhgb7owWGs&t=71s)
+  - [关于Unity和Plastic SCM协作的坑 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/473231624)
+  - https://docs.plasticscm.com/book/
+
+## 各类VCS的对比
+
+![image-20230419093254195](images/image-20230419093254195.png)
+
+
+
+# 使用VCS
+
+- Window > Unity Version Control
+- Edit > Project Settings > Version Control
+- 忽略文件：
+  - Plastic SCM：[Plastic SCM blog: Definitive ignore.conf for Unity projects](https://blog.plasticscm.com/2020/01/definitive-ignoreconf-for-unity-projects.html)
+  - Git：[gitignore/Unity.gitignore at main · github/gitignore](https://github.com/github/gitignore/blob/main/Unity.gitignore)
+
+- 提交文件：只提交不能生成的文件，即 `Assets` 和 `Project Settings` 以及`Packages`目录下的文件
+- 处理大文件：
+  - SCM和Perforce都可以用集中式保证大文件只在云端有一份
+  - Git需要下载Git LFS并指定大文件，保证大文件在云端，本地使用指针指向该大文件
+
+- 工作流程：
+  - ![image-20230419102737492](images/image-20230419102737492.png)
+  - ![image-20230419102747297](images/image-20230419102747297.png)
+
+
+
+
+
+# 总结
+
+- 个人学习的话，只是想要保留平常练手的项目的话，使用Unity官方推荐的Plastic SCM就可以了，相比上传github没有网络困扰
+
+
+
