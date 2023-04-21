@@ -6,7 +6,7 @@
   - 应用：类、函数、public fields
 - Snake Case:用`_`连接
 - Kebab Case:用`-`连接
-- Hungarian Notation: 标准变量的类型（Unity中不常见）
+- Hungarian Notation: 前缀是变量的类型（Unity中不常见）
 
 ![image-20230420164108960](images/image-20230420164108960.png)
 
