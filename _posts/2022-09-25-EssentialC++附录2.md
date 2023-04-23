@@ -7,7 +7,6 @@ catalog: true
 header-img: "img/post-bg-default.jpg"
 tags:
     - C++
-    - 读书笔记
 ---
 # 附录：泛型算法（二）
 
