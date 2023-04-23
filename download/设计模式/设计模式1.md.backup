@@ -1,0 +1,1553 @@
+# 八大设计原则
+
+设计模式的八大原则：
+
+1、单一职责原则(SRP)：一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分
+
+2、开闭原则(OCP)：软件实体应当对扩展开放，对修改关闭
+
+3、里氏替换原则(LSP)：子类可以扩展父类的功能，但不能改变父类原有的功能
+
+4、依赖倒置原则（DIP）：高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。
+
+5、接口隔离原则(ISP)：要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用
+
+6、迪米特法则（最少知识原则）：如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。其目的是降低类之间的耦合度，提高模块的相对独立性。
+
+7、组合优于继承原则（合成复用原则）
+
+8、封装变化点、面向接口编程
+
+# 重构技巧
+
+1、静态 --> 动态
+
+2、早绑定 --> 晚绑定
+
+3、继承 --> 组合
+
+4、编译时依赖 --> 运行时依赖
+
+5、紧耦合 --> 松耦合
+
+# 模式分类
+
+> 传统模式分类
+>
+> - （1）创建型模式：Singleton、Abstract Factory、Builder、Factory、Prototype
+>
+> - （2）结构型模式：Adapter、Bridge、Decorator、Composite、Facade、Flyweight、Proxy
+>
+> - （3）行为型模式：Template Method、Command、Iterator、Observer、Mediator、Memento、Interpreter、State、Strategy、Chain of Responsibility、Visitor
+
+- 红色部分表示已经`过时`或`不是很常用`
+
+<img src="images/image-20230423184518063.png" alt="image-20230423184518063" style="zoom: 67%;" />
+
+
+
+# 简单总结
+
+模版方法(Template Method)：用于制定一套模板，别人来用的时候按照模板实现
+策略模式(Strategy)：方便新增策略，只需新增一个子类
+观察者模式(Observer)：方便通知消息
+装饰模式(Decorator)：方便拓展功能
+桥模式(Bridge)：用于桥接两个向不同纬度变化的类，这个桥，就是一个类中组合另外一个类
+工厂方法(Factory Method)：创建对象解耦合
+抽象工厂(Abstract Factory)：多个产品的工厂，要生产一系列的产品，这一系列产品需要配套
+原型方法（Prototype）：有clone方法来完成对象创建
+构建者(Builder)：分步骤构建一个对象，将表示和构建分离
+单件模式（Singleton）：保证在内存中一个类只存在一个实例
+享元模式(Flyweight)：运用共享技术有效地支持大量细粒度的对象，例如线程池
+门面模式（Facade）：不管facade内部怎么变化，对于用户来说，接口都是一样的
+代理模式(Proxy)：间接控制。
+适配器(Adapter)：改变原始类接口，适配新类。比如STL中的stack
+中介者模式(Mediator)：把直接依赖关系变为间接依赖关系
+状态模式(State)：将策略模式的策略改为状态
+备忘录模式(Memento)：存储一个类的状态快照，在需要的时候设置为备忘录中的状态
+组合模式(Composite)：对象组合成树形结构。将一对多的关系替换成一对一的关系
+迭代器(Iterator)：STL中的迭代器思想
+职责链(Chain of Responsibility)：处理请求的对象连成一条链
+命令模式(Commmand)：将行为抽象为对象，有点和仿函数类似
+访问器模式(Visitor)：使用双重分发的机制，透明的添加新的操作
+解释器模式(Interpretor)：四则运算树
+
+# 组件协作模式
+
+> 组件协作模式：Template Method、Strategy、Observer/Event
+
+# Template Method
+
+### 动机
+
+> 在软件构建过程中，对于某一项任务，她常常有稳定的整体操作结构，但各个子步骤却又很多改变的需求，或者由于固有的原因而无法和任务的整体结构同时实现。如何在确定**稳定操作结构的前提**下，来应对**各个子步骤的变化或者晚期实现需求**？
+
+- 早绑定与晚绑定
+  - 早绑定：应用程序（高层）调用库程序（底层）
+  - 晚绑定：库程序（底层）调用应用程序（高层）【虚函数是实现晚绑定的一种核心机制】
+
+### 模式定义
+
+> 定义一个操作中的算法的骨架（稳定），而将一些步骤延迟（变化）到子类中。Template Method 使得子类可以不改变（复用）一个算法的结构即可重定义（override 重写）该算法的某些特定步骤。
+
+### 结构
+
+![image-20230422082433439](images/image-20230422082433439.png)
+
+- TemplateMethod() 稳定
+- PrimitiveOperation1&2() 变化
+
+### 代码
+
+```cpp
+//库程序开发人员
+class Library{
+public:
+	//稳定 template method
+    void Run(){
+        
+        Step1();
+
+        if (Step2()) { //支持变化 ==> 虚函数的多态调用
+            Step3(); 
+        }
+
+        for (int i = 0; i < 4; i++){
+            Step4(); //支持变化 ==> 虚函数的多态调用
+        }
+
+        Step5();
+
+    }
+	virtual ~Library(){ }
+
+protected:
+	
+	void Step1() { //稳定
+        //.....
+    }
+	void Step3() {//稳定
+        //.....
+    }
+	void Step5() { //稳定
+		//.....
+	}
+
+	virtual bool Step2() = 0;//变化
+    virtual void Step4() =0; //变化
+};
+
+
+//应用程序开发人员
+class Application : public Library {
+protected:
+	virtual bool Step2(){
+		//... 子类重写实现
+    }
+
+    virtual void Step4() {
+		//... 子类重写实现
+    }
+};
+
+int main()
+	{
+	    Library* pLib=new Application();
+	    lib->Run();
+
+		delete pLib;
+	}
+}
+```
+
+### 总结
+
+> 从代码可以看出，Template Method其实就是在父类中定义了虚函数，子类中将其实现，这里的父类就可以看成是一个模板，后续使用中，照着这个模板进行改进就行。这利用了C++语言的虚函数特点实现了晚绑定的思想。“让我来调用你，你别调用我”。
+
+
+
+# Strategy
+
+### 动机
+
+> 软件构造过程中，某些对象使用的**算法多种多样**，经常改变。如果将算法都编码到对象中，会使得对象异常复杂且冗余。
+>
+> 策略模式能够在运行时根据需求透明的更改对象的算法，将**算法与对象解耦合**。
+
+### 模式定义
+
+> 定义一系列算法，把它们一个个封装起来，并且使它们可互相替换（变化）。该模式使得算法可独立于使用它的客户程序（稳定）而变化（扩展，子类化）。
+
+### 代码
+
+```cpp
+//未使用Strategy模式
+enum TaxBase {
+	CN_Tax,
+	US_Tax,
+	DE_Tax,
+	FR_Tax       //更改
+};
+
+class SalesOrder{
+    TaxBase tax;
+public:
+    double CalculateTax(){
+        //...
+        
+        if (tax == CN_Tax){
+            //CN***********
+        }
+        else if (tax == US_Tax){
+            //US***********
+        }
+        else if (tax == DE_Tax){
+            //DE***********
+        }
+		else if (tax == FR_Tax){  //更改
+			//...
+		}
+
+        //....
+     }
+    
+};
+```
+
+```cpp
+//使用Strategy模式
+//计算策略 定
+class TaxStrategy{
+    TaxBase tax;
+public:
+    virtual double CalculateTax(...) = 0;
+    virtual ~CalculateTax();
+};
+//具体国家的计算式 变
+class CNTax : public TaxStrategy {
+    virtual double CalculateTax(...) {
+        ...
+    }
+};
+//扩展
+//*********************************
+class FRTax : public TaxStrategy{
+public:
+	virtual double Calculate(const Context& context){
+		//.........
+	}
+};
+
+class SalesOrder{
+private:
+    TaxStrategy* strategy;
+
+public:
+    SalesOrder(StrategyFactory* strategyFactory){
+        this->strategy = strategyFactory->NewStrategy();
+    }
+    ~SalesOrder(){
+        delete this->strategy;
+    }
+
+    public double CalculateTax(){
+        //...
+        Context context();
+        
+        double val = 
+            strategy->Calculate(context); //多态调用
+        //...
+    }
+    
+};
+
+```
+
+### 结构
+
+![image-20230422071836927](images/image-20230422071836927.png)
+
+- Context和Strategy稳定
+- ConcreteStrategy变化
+
+### 总结
+
+> 所谓的策略，就是新增的一种方法，和原有的方法是同一级的，我要把它加进来，但是不能够影响原来的代码，就需要策略模式来实现。
+> 有if-else的代码，就有使用策略模式的苗头！除非是情况完全不可能改变，比如性别，星期几等，否则尽量少用if-else。
+>
+> 从内存角度看，使用if-else会让内存加载一些可能不会用到的数据，从而降低性能。
+
+
+
+# Observer
+
+### 动机
+
+> 在软件构建过程中，我们需要为某些对象建立一种“**通知依赖关系**” ——一个对象（目标对象）的状态发生改变，所有的依赖对象（观察者对象）都将得到通知。如果这样的**依赖关系过于紧密**，将使软件不能很好地抵御变化。使用面向对象技术，可以将这种依赖关系弱化，并形成一种稳定的依赖关系。从而实现软件体系结构的松耦合。
+
+### 模式定义
+
+> 定义对象间的一种一对多（变化）的依赖关系，以便当一个对象（Subject）的状态发生改变时，所有依赖于它的对象都得到通知并自动更新。
+
+### 结构
+
+![image-20230422073732226](images/image-20230422073732226.png)
+
+- `Subject Observer`为稳定的框架部分
+- `ConcreteObserver ConcreteSubject `为具体观察者/主体对象的实现。主体对象`ConcreteSubject`改变会引发观察者`ConcreteObserver`的改变
+
+### 代码
+
+- 构建一个抽象的通知接口(Observer)，在Subject类中存储Observer列表，实现attach与detach方法
+- 其他对象(ConcreteObserver)调用Subject的attach，实现添加到Observer列表中。
+- ConcreteObserver各自实现通知后的行为
+- 通知行为：Subject调用Observer的Update函数
+
+```cpp
+//消息，Observer
+class IProgress{
+public:
+	virtual void DoProgress(float value)=0;  //通知后的行为由observer自己决定
+	virtual ~IProgress(){}
+};
+
+//subject(concrete subject)
+class FileSplitter  
+{
+	string m_filePath;
+	int m_fileNumber;
+
+	List<IProgress*>  m_iprogressList; // 抽象通知机制，支持多个观察者
+	
+public:
+	FileSplitter(const string& filePath, int fileNumber) :
+		m_filePath(filePath), 
+		m_fileNumber(fileNumber){
+
+	}
+
+	void split(){
+
+		//1.读取大文件
+
+		//2.分批次向小文件中写入
+		for (int i = 0; i < m_fileNumber; i++){
+			//...
+			
+			float progressValue = m_fileNumber; 
+			progressValue = (i + 1) / progressValue;
+			onProgress(progressValue);//发送通知
+		}
+
+	}
+
+	void addIProgress(IProgress* iprogress){ //attach
+		m_iprogressList.push_back(iprogress);
+	}
+
+	void removeIProgress(IProgress* iprogress){ //detach
+		m_iprogressList.remove(iprogress);
+	}
+
+protected:
+	virtual void onProgress(float value){
+		
+		List<IProgress*>::iterator itor=m_iprogressList.begin();
+
+		while (itor != m_iprogressList.end() )
+			(*itor)->DoProgress(value); //update,通知observer更新进度条
+			itor++;
+		}
+	}
+};
+
+
+
+  //ConcreteObserver
+class MainForm : public Form, public IProgress
+{
+	TextBox* txtFilePath;
+	TextBox* txtFileNumber;
+
+	ProgressBar* progressBar;
+
+public:
+	void Button1_Click(){
+
+		string filePath = txtFilePath->getText();
+		int number = atoi(txtFileNumber->getText().c_str());
+
+		ConsoleNotifier cn;
+
+		FileSplitter splitter(filePath, number);
+
+		splitter.addIProgress(this); // attach 订阅通知
+		splitter.addIProgress(&cn)； // attach 订阅通知
+
+		splitter.split();
+
+		splitter.removeIProgress(this);
+	}
+
+	virtual void DoProgress(float value){ // concrete observer自己实现通知后的行为
+		progressBar->setValue(value);
+	}
+};
+  //ConcreteObserver
+class ConsoleNotifier : public IProgress {
+public:
+	virtual void DoProgress(float value){ // concrete observer自己实现通知后的行为
+		cout << ".";
+	}
+};
+
+```
+
+### 总结
+
+- 使用面向对象的抽象，Observer 模式使得我们可以**独立地改变目标与观察者**，从而使二者之间的依赖关系达至松耦合。
+
+- 目标发送通知时，**无需指定观察者**，通知（可以携带通知信息作为参数）会自动传播。
+
+- 观察者自己决定是否需要订阅通知，目标对象对此一无所知。
+
+- Observer模式是基于事件的UI框架中非常常用的设计模式，也是MVC模式的一个重要组成部分。
+
+
+
+# 单一职责模式
+
+> 单一职责模式：在软件组件的设计中，如果职责划分的不清晰，使用继承得到的结果往往是随着需求的变化，子类急剧膨胀，同时充斥着重复代码，这时候的关键是划清责任。
+>
+> 典型：Decorator、Bridge
+
+
+
+# Decorator
+
+### 动机
+
+> 在某些情况下我们可能会“**过度地使用继承来扩展对象的功能**”，由于**继承为类型引入的静态特质**，使得这种扩展方式缺乏灵活性；并且随着子类的增多（扩展功能的增多），各种**子类的组合**（扩展功能的组合）会导致更多子类的膨胀。
+>
+> 如何使“对象功能的扩展”能够根据需要来动态地实现？同时避免“扩展功能的增多”带来的子类膨胀问题？从而使得任何“功能扩展变化”所导致的影响降为最低？
+
+### 模式定义
+
+> 动态（组合）地给一个对象增加一些额外的职责。就增加功能而言，Decorator模式比生成子类（继承）更为灵活（消除重复代码&减少子类个数）。
+
+### 结构
+
+![image-20230422090135598](images/image-20230422090135598.png)
+
+![image-20230422085953309](images/image-20230422085953309.png)
+
+### 代码
+
+```cpp
+//业务操作
+class Stream{
+
+public：
+    virtual char Read(int number)=0;
+    virtual void Seek(int position)=0;
+    virtual void Write(char data)=0;
+    
+    virtual ~Stream(){}
+};
+
+//主体类
+class FileStream: public Stream{
+public:
+    virtual char Read(int number){
+        //读文件流
+    }
+    virtual void Seek(int position){
+        //定位文件流
+    }
+    virtual void Write(char data){
+        //写文件流
+    }
+
+};
+
+class NetworkStream :public Stream{
+public:
+    virtual char Read(int number){
+        //读网络流
+    }
+    virtual void Seek(int position){
+        //定位网络流
+    }
+    virtual void Write(char data){
+        //写网络流
+    }
+    
+};
+
+class MemoryStream :public Stream{
+public:
+    virtual char Read(int number){
+        //读内存流
+    }
+    virtual void Seek(int position){
+        //定位内存流
+    }
+    virtual void Write(char data){
+        //写内存流
+    }
+    
+};
+
+//扩展操作
+
+DecoratorStream: public Stream{
+protected:
+    Stream* stream;//...
+    
+    DecoratorStream(Stream * stm):stream(stm){
+    
+    }
+    
+};
+
+class CryptoStream: public DecoratorStream {
+ 
+
+public:
+    CryptoStream(Stream* stm):DecoratorStream(stm){
+    
+    }
+    
+    
+    virtual char Read(int number){
+       
+        //额外的加密操作...
+        stream->Read(number);//读文件流
+    }
+    virtual void Seek(int position){
+        //额外的加密操作...
+        stream::Seek(position);//定位文件流
+        //额外的加密操作...
+    }
+    virtual void Write(byte data){
+        //额外的加密操作...
+        stream::Write(data);//写文件流
+        //额外的加密操作...
+    }
+};
+
+class BufferedStream : public DecoratorStream{
+    
+    Stream* stream;//...
+    
+public:
+    BufferedStream(Stream* stm):DecoratorStream(stm){
+        
+    }
+    //...
+};
+
+void Process(){
+
+    //运行时装配
+    FileStream* s1=new FileStream();
+    
+    CryptoStream* s2=new CryptoStream(s1);
+    
+    BufferedStream* s3=new BufferedStream(s1);
+    
+    BufferedStream* s4=new BufferedStream(s2);
+}
+
+```
+
+### 总结
+
+- 通过采用组合而非继承的方式，Decorator模式实现了在运行时动态**扩展**对象功能的能力，而且可以根据需要扩展多个功能。避免了使用继承带来的“灵活性差”和“多子类衍生问题”。
+
+*  Decorator类在接口上表现为**is-a Component**的继承关系，即Decorator类继承了Component类所具有的接口。但在实际上又表现为**has-a Component**的组合关系，即Decorator类又使用了另外一个Component类。
+* Decorator 模式的目的并非解决“多子类衍生的多继承”问题，Decorator模式应用的要点在于解决“**主体类在多个方向上的扩展功能**”——是为“装饰”的含义。
+*  这个设计模式体现了“组合优于继承”的思想！继承是为了完善接口的规范，组合是为了后期的装饰实现
+
+# Bridge
+
+### 动机
+
+> 由于某些类型的固有的实现逻辑，使得它们具有两个变化的维度，乃至**多个纬度的变化**。如何应对这种“多维度的变化”？如何利用面向对象技术来使得类型可以轻松地沿着两个乃至多个方向变化，而不引入额外的复杂度？
+
+### 模式定义
+
+> 将抽象部分（业务功能）与实现部分（平台实现）分离，使它们都可以独立地变化。
+
+### 结构
+
+<img src="images/image-20230422092229657.png" alt="image-20230422092229657" style="zoom:80%;" />
+
+
+
+- `Abstraction` `Implementor` 稳定
+- `RefinedAbstraction` `ConcreteImplementor` 变化
+
+### 代码
+
+```cpp
+class Messager{
+protected:
+    // 多个变化维度就用多个指针指向桥
+     MessagerImp* messagerImp;//...
+public:
+    virtual void Login(string username, string password)=0;
+    virtual void SendMessage(string message)=0;
+    virtual void SendPicture(Image image)=0;
+    
+    virtual ~Messager(){}
+};
+
+class MessagerImp{  //桥
+public:
+    virtual void PlaySound()=0;
+    virtual void DrawShape()=0;
+    virtual void WriteText()=0;
+    virtual void Connect()=0;
+    
+    virtual MessagerImp(){}
+};
+
+
+//平台实现 n
+class PCMessagerImp : public MessagerImp{
+public:
+    
+    virtual void PlaySound(){
+        //**********
+    }
+    virtual void DrawShape(){
+        //**********
+    }
+    virtual void WriteText(){
+        //**********
+    }
+    virtual void Connect(){
+        //**********
+    }
+};
+
+class MobileMessagerImp : public MessagerImp{
+public:
+    
+    virtual void PlaySound(){
+        //==========
+    }
+    virtual void DrawShape(){
+        //==========
+    }
+    virtual void WriteText(){
+        //==========
+    }
+    virtual void Connect(){
+        //==========
+    }
+};
+
+//业务抽象 m
+
+//类的数目：1+n+m
+
+class MessagerLite :public Messager {
+
+    
+public:
+    
+    virtual void Login(string username, string password){
+        
+        messagerImp->Connect();
+        //........
+    }
+    virtual void SendMessage(string message){
+        
+        messagerImp->WriteText();
+        //........
+    }
+    virtual void SendPicture(Image image){
+        
+        messagerImp->DrawShape();
+        //........
+    }
+};
+
+
+
+class MessagerPerfect  :public Messager {
+    
+   
+public:
+    
+    virtual void Login(string username, string password){
+        
+        messagerImp->PlaySound();
+        //********
+        messagerImp->Connect();
+        //........
+    }
+    virtual void SendMessage(string message){
+        
+        messagerImp->PlaySound();
+        //********
+        messagerImp->WriteText();
+        //........
+    }
+    virtual void SendPicture(Image image){
+        
+        messagerImp->PlaySound();
+        //********
+        messagerImp->DrawShape();
+        //........
+    }
+};
+
+
+void Process(){
+    //运行时装配
+    MessagerImp* mImp=new PCMessagerImp();
+    Messager *m =new Messager(mImp);
+}
+
+```
+
+### 总结
+
+- 桥体现在哪里呢？代码中的MessagerImp就是这个桥，Messager中组合了这个桥，它的子类可以通过这个桥去实现Messager中的抽象方法。
+- Bridge模式有时候类似于多继承方案，但是多继承方案往往违背单一职责原则（即一个类只有一个变化的原因），复用性比较差。Bridge模式是比多继承方案更好的解决方法。
+- Bridge模式的应用一般在“两个非常强的变化维度”，有时一个类也有多于两个的变化维度，这时可以使用Bridge的扩展模式，用桥把这两个方向给连接起来。
+
+* Bridge模式使用“对象间的**组合**关系”解耦了抽象和实现之间固有的绑定关系，使得抽象和实现可以沿着各自的维度来变化。所谓抽象和实现沿着各自的维度的变化，即“**子类化**”它们。
+
+# 对象创建模式
+
+> 通过“对象创建”模式绕开new，来避免对象创建（new）过程中所导致的紧耦合（依赖具体类），从而支持对象创建的稳定。它是接口抽象之后的第一步工作。
+>
+> 典型：Factory Mothod、Abstract Factory、Prototype、Builder
+
+# Factory Method
+
+### 动机
+
+> 在软件系统中，经常面临着创建对象的工作；由于需求的变化，需要创建的对象的具体类型经常变化。
+>
+> 如何应对这种变化？如何绕过常规的对象创建方法（new），提供一种“封装机制”来避免客户程序和这种“具体对象创建工作”的紧耦合？
+
+### 模式定义
+
+> 定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method 使得一个类的实例化延迟（目的：解耦，手段：虚函数）到子类。
+
+### 结构
+
+![image-20230422095223217](images/image-20230422095223217.png)
+
+`Product`和`Creator` 稳定
+`ConcreteProduct`和`ConcreteCreator`变化
+
+### 代码
+
+```cpp
+
+//抽象类
+class ISplitter{
+public:
+    virtual void split()=0;
+    virtual ~ISplitter(){}
+};
+
+
+//工厂基类
+class SplitterFactory{
+public:
+    virtual ISplitter* CreateSplitter()=0;
+    virtual ~SplitterFactory(){}
+};
+
+//------------------------------------------------------------------
+
+//具体类
+class BinarySplitter : public ISplitter{
+    
+};
+
+class TxtSplitter: public ISplitter{
+    
+};
+
+class PictureSplitter: public ISplitter{
+    
+};
+
+class VideoSplitter: public ISplitter{
+    
+};
+
+//具体工厂
+class BinarySplitterFactory: public SplitterFactory{
+public:
+    virtual ISplitter* CreateSplitter(){
+        return new BinarySplitter();
+    }
+};
+
+class TxtSplitterFactory: public SplitterFactory{
+public:
+    virtual ISplitter* CreateSplitter(){
+        return new TxtSplitter();
+    }
+};
+
+class PictureSplitterFactory: public SplitterFactory{
+public:
+    virtual ISplitter* CreateSplitter(){
+        return new PictureSplitter();
+    }
+};
+
+class VideoSplitterFactory: public SplitterFactory{
+public:
+    virtual ISplitter* CreateSplitter(){
+        return new VideoSplitter();
+    }
+};
+
+//------------------------------------------------------------------
+
+class MainForm : public Form
+{
+    SplitterFactory*  factory;//工厂
+
+public:
+    
+    MainForm(SplitterFactory*  factory){
+        this->factory=factory;
+    }
+    
+	void Button1_Click(){
+
+        
+		ISplitter * splitter=
+            factory->CreateSplitter(); //多态new
+        
+        splitter->split();
+
+	}
+};
+
+```
+
+### 总结
+
+- Factory Method 模式用于隔离类对象的使用者和具体类型之间的耦合关系。面对一个经常变化的具体类型，紧耦合关系（new）会导致软件的脆弱。
+
+- Factory Method 模式通过面向对象的方法，将所要创建的具体对象工作延迟到子类，从而实现一种扩展（而非更改）的策略。缺点在于`要求创建方法/参数相同`。
+
+# Abstract Factory
+
+### 动机
+
+> 在软件系统中，经常面临着“**一系列相互依赖的对象**”的**创建**工作；同时，由于需求的变化，往往存在更多系列对象的创建工作。
+>
+> 如何应对这种变化？如何绕过常规的对象创建方法（new），提供一种“封装机制”来避免客户程序的这种“多系列具体对象创建工作”的紧耦合？
+
+### 模式定义
+
+> 提供一个接口，让该接口负责创建一系列“相关或者相互依赖的对象”，无需指定它们具体的类。
+
+### 结构
+
+![image-20230422100742936](images/image-20230422100742936.png)
+
+`AbstractFactory`和`AbstractProduct` 稳定
+`ConcreteFactory`和`Client` 变化
+
+### 代码
+
+```cpp
+
+//数据库访问有关的基类
+class IDBConnection{
+    
+};
+
+class IDBCommand{
+    
+};
+
+class IDataReader{
+    
+};
+
+//AbstractFactory
+class IDBFactory{
+public:
+    virtual IDBConnection* CreateDBConnection()=0; //AbstractProduct 
+    virtual IDBCommand* CreateDBCommand()=0;  //AbstractProduct 
+    virtual IDataReader* CreateDataReader()=0; //AbstractProduct 
+    
+};
+
+
+//支持SQL Server
+class SqlConnection: public IDBConnection{
+
+};
+class SqlCommand: public IDBCommand{
+
+};
+class SqlDataReader: public IDataReader{
+    
+};
+
+
+class SqlDBFactory:public IDBFactory{
+public:
+    virtual IDBConnection* CreateDBConnection()=0;
+    virtual IDBCommand* CreateDBCommand()=0;
+    virtual IDataReader* CreateDataReader()=0;
+ 
+};
+
+//支持Oracle
+class OracleConnection: public IDBConnection{
+    
+};
+
+class OracleCommand: public IDBCommand{
+    
+};
+
+class OracleDataReader: public IDataReader{
+    
+};
+
+
+
+class EmployeeDAO{
+    IDBFactory* dbFactory;
+    
+public:
+    vector<EmployeeDO> GetEmployees(){
+        IDBConnection* connection =
+            dbFactory->CreateDBConnection();
+        connection->ConnectionString("...");
+
+        IDBCommand* command =
+            dbFactory->CreateDBCommand();
+        command->CommandText("...");
+        command->SetConnection(connection); //关联性
+
+        IDBDataReader* reader = command->ExecuteReader(); //关联性
+        while (reader->Read()){
+
+        }
+
+    }
+};
+```
+
+
+
+### 总结
+
+- 如果没有对应“多系列对象构建”的需求变化，则没有必要使用Abstract Factory 模式，这时候使用简单的工厂完全可以。
+
+- “系列对象”指的是在某一特定系列下的对象之间相互依赖、或作用的关系。不同系列的对象之间不能相互依赖。
+
+- Abstract Factory 模式主要在于应对“新`系列`”的需求变动。其缺点在于难以应对“新对象”的需求变动。
+- Abstract Factory和Factory Method区别不是很大，通常统称为`Factory模式`
+
+# Prototype
+
+### 动机
+
+> 在软件系统中，经常面临着“某些**结构复杂的对象**”的创建工作；由于需求的变化，这些**对象经常面临着剧烈的变化**，但是它们却拥有**比较稳定一致的接口**。
+>
+> 如何应对这种变化？如何向“客户程序（使用这些对象的程序）”隔离出“这些易变对象”，从而使得“依赖这些易变对象的客户程序”不随着需求改变而改变？
+
+### 模式定义
+
+> 使用原型实例制定创建对象的种类，然后通过拷贝(深拷贝)这些原型来创建新的对象。
+
+### 结构
+
+<img src="images/image-20230422101922426.png" alt="image-20230422101922426" style="zoom:80%;" />
+
+`Prototype` 稳定
+`ConcretePrototype` 变化
+
+### 代码
+
+```cpp
+//抽象类
+class ISplitter{
+public:
+    virtual void split()=0;
+    virtual ISplitter* clone()=0; //通过克隆自己来创建对象
+    
+    virtual ~ISplitter(){}
+
+};
+
+
+
+//具体类
+class BinarySplitter : public ISplitter{
+public:
+    virtual ISplitter* clone(){
+        return new BinarySplitter(*this);
+    }
+};
+
+class TxtSplitter: public ISplitter{
+public:
+    virtual ISplitter* clone(){
+        return new TxtSplitter(*this);
+    }
+};
+
+class PictureSplitter: public ISplitter{
+public:
+    virtual ISplitter* clone(){
+        return new PictureSplitter(*this);
+    }
+};
+
+class VideoSplitter: public ISplitter{
+public:
+    virtual ISplitter* clone(){
+        return new VideoSplitter(*this);
+    }
+};
+
+
+
+
+class MainForm : public Form
+{
+    ISplitter*  prototype;//原型对象
+
+public:
+    
+    MainForm(ISplitter*  prototype){
+        this->prototype=prototype;
+    }
+    
+	void Button1_Click(){
+
+		ISplitter * splitter=
+            prototype->clone(); //克隆原型
+        
+        splitter->split();
+	}
+};
+```
+
+### 总结
+
+- 通过克隆自己来创建对象。所谓原型，就是在具体类中有一个原型，但是他不是供使用的，而是用给别人`克隆`（深拷贝）的！
+- 相比于工厂方法，用得较少。抽象工厂是适合“创建方式简单的对象”，原型方法适合“`创建方式复杂`的对象”
+- Prototype 模式同样用于隔离类对象的使用者和具体类型（易变类）之间的耦合关系，它同样要求这些“易变类”拥有“稳定的接口”。
+- Prototype 模式对于“如何创建易变类的实体对象”采用“原型克隆”的方法来做，它使得我们可以非常灵活地动态创建“拥有某些稳定接口”的新对象——所需工作仅仅是注册一个新类的对象（即原型），然后`在任何需要的地方Clone`。
+- Prototype 模式中的Clone 方法可以利用某些框架中的序列化来实现深拷贝。
+
+# Builder
+
+### 动机
+
+> 在软件系统中，有时候面临着“一个**复杂对象**”的创建工作，其通常由各个部分的子对象用一定的算法构成；由于需求的变化，这个复杂对象的各个部分经常面临着剧烈的变化，但是将它们组合在一起的算法却相对稳定。如何应对这种变化？如何提供一种“封装机制”来隔离出“复杂对象的各个部分”的变化，从而保持系统中的“**稳定构建算法**”不随着需求改变而改变？
+
+### 模式定义
+
+> 将一个复杂对象的构建与其表示相分离，使得同样的构建过程（稳定）可以创建不同的表示（变化）。
+
+### 结构
+
+<img src="images/image-20230422103637997.png" alt="image-20230422103637997" style="zoom:80%;" />
+
+`Director` 和 `Builder` 稳定
+`ConcreteBuilder` 变化
+
+### 代码
+
+```cpp
+// base product
+class House{
+    //....
+};
+
+// base builder
+class HouseBuilder {
+public:
+    House* GetResult(){
+        return pHouse;
+    }
+    virtual ~HouseBuilder(){}
+protected:
+    
+    House* pHouse;
+	virtual void BuildPart1()=0;
+    virtual void BuildPart2()=0;
+    virtual void BuildPart3()=0;
+    virtual void BuildPart4()=0;
+    virtual void BuildPart5()=0;
+	
+};
+
+class StoneHouse: public House{
+    
+};
+
+class StoneHouseBuilder: public HouseBuilder{
+protected:
+    
+    virtual void BuildPart1(){
+        //pHouse->Part1 = ...;
+    }
+    virtual void BuildPart2(){
+        
+    }
+    virtual void BuildPart3(){
+        
+    }
+    virtual void BuildPart4(){
+        
+    }
+    virtual void BuildPart5(){
+        
+    }
+    
+};
+
+
+class HouseDirector{
+    
+public:
+    HouseBuilder* pHouseBuilder;
+    
+    HouseDirector(HouseBuilder* pHouseBuilder){
+        this->pHouseBuilder=pHouseBuilder;
+    }
+    
+    House* Construct(){
+        
+        pHouseBuilder->BuildPart1();
+        
+        for (int i = 0; i < 4; i++){
+            pHouseBuilder->BuildPart2();
+        }
+        
+        bool flag=pHouseBuilder->BuildPart3();
+        
+        if(flag){
+            pHouseBuilder->BuildPart4();
+        }
+        
+        pHouseBuilder->BuildPart5();
+        
+        return pHouseBuilder->GetResult();
+    }
+};
+
+```
+
+### 总结
+
+- 类似**Template Method**。builder就是类中的init()方法。把house和houseBuild分离。
+- Builder 模式主要用于“分步骤构建一个复杂的对象”。在这其中“**分步骤**”是一个**稳定**的算法，而**复杂对象的各个部分则经常变化**。
+- 变化点在哪里，封装哪里——Builder模式主要在于应对**复杂对象各个部分**的频繁需求变动。
+- 其缺点在于难以应对分步骤**构建算法的需求变动**。
+- 在Builder模式中，需要注意不同语言中构建器内调用虚函数的差别（C++ vs. C#和Java）。
+
+# 对象性能模式
+
+> 面向对象很好的解决了“抽象”的问题，但是不可避免地要付出**一定的代价**。对于通常情况来讲，面向对象的成本大都可以忽略不计。但是某些情况，面向对象所带来的成本必须谨慎处理。
+>
+> 典型模式:Singleton、Flyweight(享元)
+
+# Singleton
+
+### 动机
+
+> 在软件系统中，经常有这样一些特殊的类，必须保证它们在系统中**只存在一个实例**，才能确保它们的逻辑正确性、以及良好的效率。
+>
+> 如何绕过常规的构造器，提供一种机制来保证**一个类只有一个实例**？
+>
+> 这应该是类设计者的责任，而不是使用者的责任
+
+### 模式定义
+
+> 保证一个类仅有一个实例，并提供一个该实例的全局访问点。
+
+### 结构
+
+![image-20230422170855887](images/image-20230422170855887.png)
+
+### 代码
+
+```cpp
+
+class Singleton{
+private:
+    Singleton();  //构造为私有
+    Singleton(const Singleton& other); //构造为私有
+public:
+    static Singleton* getInstance(); 
+    static Singleton* m_instance; 
+};
+
+Singleton* Singleton::m_instance=nullptr;
+
+//线程非安全版本
+Singleton* Singleton::getInstance() {
+    if (m_instance == nullptr) {
+        m_instance = new Singleton();
+    }
+    return m_instance;
+}
+
+//线程安全版本，但锁的代价过高
+Singleton* Singleton::getInstance() {
+    Lock lock;
+    if (m_instance == nullptr) {
+        m_instance = new Singleton();
+    }
+    return m_instance;
+}
+
+//双检查锁，但由于内存读写reorder不安全
+Singleton* Singleton::getInstance() {
+    
+    if(m_instance==nullptr){
+        Lock lock;
+        if (m_instance == nullptr) {
+            m_instance = new Singleton();
+        }
+    }
+    return m_instance;
+}
+
+//C++ 11版本之后的跨平台实现 (volatile)
+std::atomic<Singleton*> Singleton::m_instance;
+std::mutex Singleton::m_mutex;
+
+Singleton* Singleton::getInstance() {
+    Singleton* tmp = m_instance.load(std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_acquire);//获取内存fence
+    if (tmp == nullptr) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        tmp = m_instance.load(std::memory_order_relaxed);
+        if (tmp == nullptr) {
+            tmp = new Singleton;
+            std::atomic_thread_fence(std::memory_order_release);//释放内存fence
+            m_instance.store(tmp, std::memory_order_relaxed);
+        }
+    }
+    return tmp;
+}
+
+```
+
+
+
+### 总结
+
+- Singleton 模式中的实例构造器可以设置为 protected 以允许子类派生。
+
+- Singleton 模式一般不要支持拷贝构造函数和Clone接口，因为这有可能导致多个对象实例，与 Singleton 模式的初衷违背。
+
+- Singleton 模式一般私有构造函数，静态实例，提供一个getInstance方法。要考虑线程安全的问题。
+
+
+
+# Flyweight
+
+### 动机
+
+> 在软件系统采用纯粹对象方案的问题在于大量细粒度的对象会很快充斥在系统中，从而带来很高的运行时代价——主要是指内存需求方面的代价。
+>
+> 如何避免**大量细粒度对象**问题的同时，让外部客户程序仍然能够透明地使用面向对象的方式来进行操作？
+
+### 模式定义
+
+> 运用**共享技术**有效地支持大量细粒度的对象。
+
+### 结构
+
+<img src="images/image-20230422171727140.png" alt="image-20230422171727140" style="zoom:80%;" />
+
+### 代码
+
+```cpp
+
+class Font {
+private:
+
+    //unique object key
+    string key;
+    
+    //object state
+    //....
+    
+public:
+    Font(const string& key){
+        //...
+    }
+};
+
+
+class FontFactory{
+private:
+    map<string,Font* > fontPool;
+    
+public:
+    Font* GetFont(const string& key){
+
+        map<string,Font*>::iterator item=fontPool.find(key);
+        
+        if(item!=footPool.end()){
+            return fontPool[key];
+        }
+        else{
+            Font* font = new Font(key);
+            fontPool[key]= font;
+            return font;
+        }
+
+    }
+    
+    void clear(){
+        //...
+    }
+};
+```
+
+### 总结
+
+- **对象池**的设计思想就是享元模式。
+- Flyweight主要**解决面向对象的代价问题**，一般不触及面向对象的抽象性问题。
+- Flyweight 采用**对象共享**的作法来降低系统中对象的个数，从而降低细粒度对象给系统带来的内存压力。
+- 在具体实现方面，要注意**对象状态**的处理。
+
+# 接口隔离模式
+
+> 在组件构建过程中，某些接口之间的**直接依赖**常常会带来很多问题、甚至根本无法实现。采用添加一层**间接接口**，来隔离本来互相紧密关联的接口是一种常见的解决方案。操作系统、软件、用户关系中，软件就是中间层。
+>
+> 典型模式：Facade 门面模式（系统内外）、Proxy（被隔离）、Adapter（新老接口）、Mediator（系统内）
+
+# Facade
+
+### 动机
+
+> 下面A方案的问题在于组件的客户和组件中各种复杂的子系统有了过多的**耦合**，随着外部客户程序和各子系统的演化，这种过多的耦合面临很多变化的挑战。
+>
+> 如何**简化外部客户程序和系统间的交互接口**？如何将外部客户程序的演化和内部子系统的变化之间的依赖相互解耦？
+
+<img src="images/image-20230422172828738.png" alt="image-20230422172828738" style="zoom:80%;" />
+
+### 模式定义
+
+> 为子系统中的一组接口提供一个**一致（稳定）**的界面，Facade模式定义了一个**高层接口**，这个接口使得这一子系统更加容易使用（复用）。
+
+### 结构
+
+<img src="images/image-20230422172951732.png" alt="image-20230422172951732" style="zoom:67%;" />
+
+### 代码
+
+没有固定的结构
+
+### 总结
+
+- 从客户程序的角度来看，Facade模式**简化了整个组件系统的接口**，对于组件内部与外部客户程序来说，达到了一种“解耦”的效果——内部子系统的任何变化不会影响到Facade接口的变化。
+
+- Facade 设计模式更注重从架构的层次去看整个系统，而不是单个类的层次。Facade 很多时候更是一种**架构设计模式**。
+
+- Facade 设计模式**并非是一个集装箱**，可以任意地放进任何多个对象。Facade 模式中组件的内部应该是“**相互耦合关系比较大的一系列组件**”，而不是一个简单的功能集合。
+
+# Proxy
+
+### 动机
+
+> 在面向对象系统中，有些对象由于某种原因（比如对象创建的开销很大，或者某些操作需要安全控制，或者需要进程外的访问等），**直接访问**会给使用者、或者系统结构带来很多**麻烦**。
+>
+> 如何在不失去透明操作对象的同时来管理/控制这些对象特有的复杂性？增加一层间接层是软件开发中常见的解决方式。
+
+### 模式定义
+
+> 为其他对象提供一种**代理**以控制（隔离，使用接口）对这个对象的访问。
+
+### 结构
+
+<img src="images/image-20230422173540698.png" alt="image-20230422173540698" style="zoom:80%;" />
+
+**Subject**稳定
+**RealSubject**和**Proxy**变化
+
+### 代码
+
+```cpp
+class ISubject{
+public:
+    virtual void process();
+};
+
+
+//Proxy的设计
+class SubjectProxy: public ISubject{
+    
+public:
+    virtual void process(){
+        //对RealSubject的一种间接访问
+        //....
+    }
+};
+
+class ClientApp{
+    
+    ISubject* subject;
+    
+public:
+    
+    ClientApp(){
+        subject=new SubjectProxy();
+    }
+    
+    void DoTask(){
+        //...
+        subject->process();
+        
+        //....
+    }
+};
+```
+
+### 总结
+
+- “增加一层间接层”是软件系统中对许多复杂问题的一种常见解决方法。在面向对象系统中，直接使用某些对象会带来很多问题，作为**间接层**的proxy对象便是解决这一问题的常用手段。
+
+- 具体proxy设计模式的实现方法、实现粒度都相差很大，有些可能对单个对象做细粒度的控制，如copy-on-write技术，有些可能对组建模块提供抽象代理层，在架构层次对对象做proxy。
+
+- Proxy并**不一定要求保持接口完整的一致性**，只要能够实现**间接控制**，有时候**损失一些透明性**是可以接受的。
+
+  
+
+# Adapter
+
+### 动机
+
+> 在软件系统中，由于应用环境的变化，常常需要将“一些现存的对象”放在新的环境中应用，但是新环境要求的接口是这些现存对象所不满足的。
+>
+> 如何应对这种“**迁移的变化**”？如何既能利用现有对象的良好实现，同时又能满足新的应用环境所要求的接口？
+
+### 模式定义
+
+> 将一个类的**接口转换**成客户希望的另一个接口。Adapter 模式使得原本由于**接口不兼容**而不能一起工作的那些类可以一起工作。
+
+### 结构
+
+<img src="images/image-20230422174405075.png" alt="image-20230422174405075" style="zoom:80%;" />
+
+`Target`和`Adaptee(以前的接口)`稳定
+`Adapter`变化
+
+### 代码
+
+```cpp
+//目标接口（新接口）
+class ITarget{
+public:
+    virtual void process()=0;
+};
+
+//遗留接口（老接口）
+class IAdaptee{
+public:
+    virtual void foo(int data)=0;
+    virtual int bar()=0;
+};
+
+//遗留类型
+class OldClass: public IAdaptee{
+    //....
+};
+
+//对象适配器
+class Adapter: public ITarget{ //继承
+protected:
+    IAdaptee* pAdaptee;//组合
+    
+public:
+    
+    Adapter(IAdaptee* pAdaptee){
+        this->pAdaptee=pAdaptee;
+    }
+    
+    virtual void process(){
+        int data=pAdaptee->bar();
+        pAdaptee->foo(data);
+        
+    }
+    
+};
+
+//类适配器
+class Adapter: public ITarget,
+               protected OldClass{ //多继承，protected 继承
+                          
+}
+
+int main(){
+    IAdaptee* pAdaptee=new OldClass();
+    
+    ITarget* pTarget=new Adapter(pAdaptee);
+    pTarget->process();
+    
+}
+```
+
+
+
+### 总结
+
+- Adapter模式主要应用于“希望复用一些现存的类，但是接口又与复用环境要求不一致的情况”，在**遗留代码复用、类库迁移**等方面非常有用。
+- GoF 23 定义了两种Adapter模式的实现结构：**对象适配器**和**类适配器**。但类适配器采用“多继承”的实现方式，一般**不推荐使用**。对象适配器采用“对象组合”的方式，更符合松耦合精神。
+- Adapter模式可以实现的非常灵活，不必拘泥于GoF23中定义的两种结构。例如，完全可以将Adapter模式中的“现存对象”作为新的接口方法参数，来达到适配的目的。例如：STL中**stack**和**queue**是deque的adapter
+
+# Mediator
+
+### 动机
+
+> 在软件构建过程中，经常会出现**多个对象互相关联交互**的情况，对象之间常常会维持一种复杂的引用关系，如果遇到一些需求的更改，这种**直接的引用关系**将面临不断的变化。
+>
+> 在这种情况下，我们可以使用一个“**中介对象**”来管理对象间的关联关系，避免相互交互的对象之间的紧耦合引用关系，从而更好的抵御变化。
+
+### 模式定义
+
+> 用一个**中介对象**来封装（封装变化）一系列的对象交互。中介者使各对象**不需要显式的相互引用**（编译时依赖→运行时依赖），从而使其耦合松散（管理变化），而且可以独立地改变它们之间的交互。
+
+### 结构
+
+<img src="images/image-20230422190455073.png" alt="image-20230422190455073" style="zoom:67%;" />
+
+<img src="images/image-20230422190255511.png" alt="image-20230422190255511" style="zoom:80%;" />
+
+Colleague和Mediator两个类之间相互依赖，Colleague之间不相互依赖，但是会通过Mediator间接依赖。把直接依赖关系变为**间接依赖**关系。
+
+facade用于解耦内部与外部之间的关系，mediator相当于解耦facade内部之间的关系。
+
+### 代码
+
+无代码
+
+### 总结
+
+- 将多个对象间复杂的关联关系解耦，Mediator模式将多个对象间的控制逻辑进行**集中管理**，变“多个对象互相关联”为“**多个对象和一个中介者关联**”，简化了系统的维护，抵御了可能的变化。
+
+- 随着控制逻辑的复杂化，Mediator具体对象的实现可能相当复杂。这时候可以对Mediator对象进行分界处理。
+
+- Facade模式是解耦**系统间（单向）**的对象关联关系；Mediator模式是解耦系统内各个**对象之间（双向）**的关联关系。
+
