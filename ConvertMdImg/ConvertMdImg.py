@@ -8,9 +8,9 @@ def patch_md(filename):
     return False
 
 def _patch_replace(text,folder):
-    pat = "]\(.*imgs/image"
+    pat = "]\(.*images/image"
     pattern = re.compile(pat)
-    replace=r'](https://gnoy-nus.github.io/img/in-post/'+folder+r'/imgs/image' #换成图片所存储的位置
+    replace=r'](https://gnoy-nus.github.io/img/in-post/'+folder+r'/images/image' #换成图片所存储的位置
     text=re.sub(pattern,replace,text)
     return text
 
