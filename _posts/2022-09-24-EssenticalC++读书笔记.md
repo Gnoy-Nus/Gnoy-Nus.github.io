@@ -7,7 +7,6 @@ catalog: true
 header-img: "img/post-bg-default.jpg"
 tags:
     - C++
-    - 读书笔记
 ---
 # 第二章 面向过程的编程风格
 
