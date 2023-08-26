@@ -3,8 +3,8 @@ title: Gnoy-Nus Blog
 SEOTitle: Gnoy-Nus的博客 | Gnoy-Nus Blog
 header-img: img/home-bg.jpg
 email: 924466726@qq.com
-description: "这里是 Gnoy-Nus 的个人博客，与你一起发现更大的世界"
-keyword: "C++,游戏,博客,Gnoy-Nus"
+description: "Gnoy-Nus 的个人博客"
+keyword: "编程,游戏,博客,Gnoy-Nus"
 url: "https://gnoy-nus.github.io" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
@@ -77,7 +77,7 @@ livere_uid: MTAyMC81NzMyMy8zMzc4Nw
 
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
-sidebar-about-description: "爱好游戏 <br> 努力成为一名优秀的游戏程序员 "
+sidebar-about-description: "游戏爱好者 <br> "
 sidebar-avatar: https://avatars.githubusercontent.com/u/69850710?s=400&u=eb4c8a1121efbd84fe8825f9b6331cf299983900&v=4 # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
