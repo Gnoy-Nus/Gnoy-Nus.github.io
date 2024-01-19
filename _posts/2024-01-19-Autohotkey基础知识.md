@@ -9,7 +9,7 @@ tags:
     - AutoHotKey
 ---
 
-## Autohotkey 简介
+## AutoHotKey 简介
 
 - Autohotkey 定义了一种脚本语言（.ahk 文件），通过脚本可以快速自定义实用的简单操作，例如
   - 设置全局快捷键（打开某个应用然后进行某种固定操作等）
@@ -18,11 +18,11 @@ tags:
   - [AutoHotkey/AutoHotkey: AutoHotkey - macro-creation and automation-oriented scripting utility for Windows. (github.com)](https://github.com/AutoHotkey/AutoHotkey)
 
 
-## Autohotkey脚本使用方法
+## AutoHotKey  脚本使用方法
 
 - 安装完Autohotkey后，只要编写完 `.ahk` 脚本文件后，`双击脚本文件运行`
 
-## Autohotkey 脚本基础知识
+## AutoHotKey 脚本基础知识
 
 ### 快速入门
 
